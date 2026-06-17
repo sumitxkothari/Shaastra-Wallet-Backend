@@ -255,32 +255,4 @@ router.post('/reset-spin', [authMiddleware, authLimiter], async (req, res) => {
   }
 });
 
-
-// ============================================
-// 🛠️ DEV ONLY: FORCE SET S-PIN (No OTP needed)
-// Use this to quickly fix your account for testing
-// ============================================
-router.post('/force-set-spin', authMiddleware, async (req, res) => {
-  try {
-    const { sPin } = req.body;
-
-    if (!sPin || sPin.length < 4) {
-      return res.status(400).json({ message: 'S-Pin must be 4 digits.' });
-    }
-
-    const user = await User.findByPk(req.user.id);
-    
-    // Hash the S-Pin
-    const salt = await bcrypt.genSalt(10);
-    user.sPin = await bcrypt.hash(sPin, salt);
-    
-    await user.save();
-
-    res.json({ message: `✅ Success! S-Pin set to ${sPin}. You can now send money.` });
-  } catch (error) {
-    console.error('Force Set Error:', error);
-    res.status(500).json({ message: 'Error setting S-Pin' });
-  }
-});
-
 module.exports = router;
